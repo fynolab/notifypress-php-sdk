@@ -1,0 +1,9 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    # The SDK supports PHP 8.1 even though it may be developed on a newer
+    # runtime — pin the analysis so 8.2+ syntax cannot slip in unnoticed.
+    phpVersion: 80100
+    treatPhpDocTypesAsCertain: false

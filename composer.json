@@ -1,0 +1,64 @@
+{
+    "name": "notifypress/sdk",
+    "description": "Official PHP SDK for the NotifyPress REST API — send and manage web push notifications, subscribers, segments, and automations.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "notifypress",
+        "web-push",
+        "push-notifications",
+        "fcm",
+        "sdk"
+    ],
+    "homepage": "https://notifypress.com",
+    "support": {
+        "issues": "https://github.com/fynolab/notifypress-php/issues",
+        "source": "https://github.com/fynolab/notifypress-php"
+    },
+    "require": {
+        "php": "^8.1",
+        "ext-json": "*",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-message": "^1.1 || ^2.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "guzzlehttp/guzzle": "^7.9",
+        "pestphp/pest": "^2.34 || ^3.5 || ^4.0",
+        "phpstan/phpstan": "^2.0"
+    },
+    "suggest": {
+        "ext-curl": "Enables the default zero-dependency cURL transport (falls back to PHP streams).",
+        "guzzlehttp/guzzle": "Detected automatically and used as the HTTP client when installed (e.g. in Laravel)."
+    },
+    "autoload": {
+        "psr-4": {
+            "NotifyPress\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NotifyPress\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "pest",
+        "phpstan": "phpstan analyse",
+        "cs": "php-cs-fixer fix --dry-run --diff",
+        "cs:fix": "php-cs-fixer fix",
+        "check": [
+            "@cs",
+            "@phpstan",
+            "@test"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
