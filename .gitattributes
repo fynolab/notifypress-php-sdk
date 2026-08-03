@@ -2,6 +2,7 @@
 # vendor/ directory and ships it inside the plugin zip, so anything not
 # needed at runtime is dead weight in every install.
 /tests                  export-ignore
+/stubs                  export-ignore
 /examples               export-ignore
 /.github                export-ignore
 /phpunit.xml.dist       export-ignore

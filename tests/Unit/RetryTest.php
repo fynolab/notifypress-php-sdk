@@ -167,11 +167,15 @@ it('surfaces a rate limit as a typed exception once retries are spent', function
         ->willRespond(429, ['message' => 'Too many.'], ['Retry-After' => '5'])
         ->willRespond(429, ['message' => 'Too many.'], ['Retry-After' => '5']);
 
+    $exception = null;
+
     try {
         testTransport($http, new RecordingSleeper(), 1)->request('GET', '/subscribers');
-        expect()->fail('Expected a RateLimitException.');
-    } catch (RateLimitException $exception) {
-        expect($exception->retryAfter)->toBe(5)
-            ->and($exception->status)->toBe(429);
+    } catch (RateLimitException $caught) {
+        $exception = $caught;
     }
+
+    expect($exception?->retryAfter)->toBe(5)
+        ->and($exception?->status)->toBe(429)
+        ->and($http->callCount())->toBe(2);
 });

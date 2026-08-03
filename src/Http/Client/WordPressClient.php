@@ -29,7 +29,6 @@ final class WordPressClient implements HttpClientInterface
 
     public function send(Request $request): Response
     {
-        /** @var array<string, mixed>|WP_Error $result */
         $result = wp_remote_request($request->uri, [
             'method' => $request->method,
             'headers' => $request->headers,
@@ -44,12 +43,10 @@ final class WordPressClient implements HttpClientInterface
             throw $this->transportFailure($result, $request);
         }
 
-        /** @var int $status */
-        $status = wp_remote_retrieve_response_code($result);
-        /** @var string $body */
-        $body = wp_remote_retrieve_body($result);
+        // WordPress reports the status as a string on some transports.
+        $status = (int) wp_remote_retrieve_response_code($result);
 
-        return new Response($status, $this->headers($result), $body);
+        return new Response($status, $this->headers($result), wp_remote_retrieve_body($result));
     }
 
     /**

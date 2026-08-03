@@ -3,6 +3,10 @@ parameters:
     paths:
         - src
         - tests
+    # WordPress is an environment the SDK may run inside, not a dependency, so
+    # its symbols have to be described for analysis to reach that code path.
+    scanFiles:
+        - stubs/wordpress.php
     # The SDK supports PHP 8.1 even though it may be developed on a newer
     # runtime — pin the analysis so 8.2+ syntax cannot slip in unnoticed.
     phpVersion: 80100

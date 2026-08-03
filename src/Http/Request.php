@@ -15,6 +15,8 @@ namespace NotifyPress\Http;
 final class Request
 {
     /**
+     * @param non-empty-string      $method
+     * @param non-empty-string      $uri
      * @param array<string, string> $headers
      */
     public function __construct(

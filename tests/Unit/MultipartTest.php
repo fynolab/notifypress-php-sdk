@@ -88,13 +88,16 @@ it('rejects a file type the server would reject anyway', function () {
 });
 
 it('reports an oversized upload against the field the API would blame', function (string $field, int $kilobytes) {
+    $exception = null;
+
     try {
         MultipartBody::make()->file($field, str_repeat('x', ($kilobytes + 1) * 1024), $field . '.png');
-        expect()->fail('Expected a ValidationException.');
-    } catch (ValidationException $exception) {
-        expect($exception->fields())->toBe([$field])
-            ->and($exception->first($field))->toContain((string) $kilobytes);
+    } catch (ValidationException $caught) {
+        $exception = $caught;
     }
+
+    expect($exception?->fields())->toBe([$field])
+        ->and($exception?->first($field))->toContain((string) $kilobytes);
 })->with([
     'icon over 2 MB' => ['icon', MultipartBody::MAX_ICON_KB],
     'image over 4 MB' => ['image', MultipartBody::MAX_IMAGE_KB],

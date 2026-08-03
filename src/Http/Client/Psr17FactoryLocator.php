@@ -28,7 +28,7 @@ final class Psr17FactoryLocator
      *
      * @var list<string>
      */
-    private const CANDIDATES = [
+    private static array $candidates = [
         'GuzzleHttp\\Psr7\\HttpFactory',
         'Nyholm\\Psr7\\Factory\\Psr17Factory',
         'Laminas\\Diactoros\\RequestFactory',
@@ -37,6 +37,20 @@ final class Psr17FactoryLocator
 
     private function __construct()
     {
+    }
+
+    /**
+     * Adds a PSR-17 implementation the SDK does not know about, so an
+     * application using an unusual one still gets automatic detection.
+     *
+     * @param string $factory Class name implementing both the PSR-17 request
+     *                        and stream factory interfaces
+     */
+    public static function register(string $factory): void
+    {
+        if (! in_array($factory, self::$candidates, true)) {
+            array_unshift(self::$candidates, $factory);
+        }
     }
 
     public static function isAvailable(): bool
@@ -49,16 +63,17 @@ final class Psr17FactoryLocator
      */
     public static function find(): ?object
     {
-        foreach (self::CANDIDATES as $candidate) {
-            if (! class_exists($candidate)) {
+        foreach (self::$candidates as $candidate) {
+            // Check the class rather than an instance: a candidate that only
+            // implements half of PSR-17 is no use here, and there is no reason
+            // to construct it to find that out.
+            if (! class_exists($candidate)
+                || ! is_a($candidate, RequestFactoryInterface::class, true)
+                || ! is_a($candidate, StreamFactoryInterface::class, true)) {
                 continue;
             }
 
-            $instance = new $candidate();
-
-            if ($instance instanceof RequestFactoryInterface && $instance instanceof StreamFactoryInterface) {
-                return $instance;
-            }
+            return new $candidate();
         }
 
         return null;

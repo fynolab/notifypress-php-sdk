@@ -31,7 +31,7 @@ function errorResponse(int $status, array $body = [], array $headers = []): Resp
 
 it('maps each status to the most specific exception', function (int $status, array $body, string $expected) {
     /** @var array<string, mixed> $body */
-    expect(ErrorFactory::create(errorResponse($status, $body)))->toBeInstanceOf($expected);
+    expect(ErrorFactory::create(errorResponse($status, $body))::class)->toBe($expected);
 })->with([
     'validation' => [422, ['message' => 'Invalid.', 'errors' => ['title' => ['Required.']]], ValidationException::class],
     'unauthenticated' => [401, ['message' => 'Unauthenticated.'], AuthenticationException::class],

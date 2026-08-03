@@ -96,7 +96,7 @@ final class Transport
         array|MultipartBody|null $body = null,
         ?RequestOptions $options = null,
     ): Response {
-        $method = strtoupper($method);
+        $method = $method === '' ? 'GET' : strtoupper($method);
         $options ??= new RequestOptions();
 
         $request = new Request(
@@ -149,12 +149,13 @@ final class Transport
     }
 
     /**
-     * @param array<string, scalar|null> $query
+     * @param  array<string, scalar|null> $query
+     * @return non-empty-string
      */
     private function url(string $path, array $query): string
     {
         $base = rtrim($this->config->baseUrl, '/');
-        $suffix = str_starts_with($path, '/') ? $path : '/' . $path;
+        $suffix = '/' . ltrim($path, '/');
 
         return $base . $suffix . Query::toString($query);
     }

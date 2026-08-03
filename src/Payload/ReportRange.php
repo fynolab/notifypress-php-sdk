@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace NotifyPress\Payload;
 
+use DateInterval;
+use DateTimeImmutable;
 use DateTimeInterface;
 use NotifyPress\Payload\Concerns\BuildsPayload;
 
@@ -29,11 +31,11 @@ final class ReportRange implements Payload
      */
     public static function lastDays(int $days): self
     {
-        $range = new self();
+        $today = new DateTimeImmutable();
 
-        return $range
-            ->from(date(self::DATE_FORMAT, strtotime(sprintf('-%d days', $days))))
-            ->to(date(self::DATE_FORMAT));
+        return (new self())
+            ->from($today->sub(new DateInterval(sprintf('P%dD', max(0, $days)))))
+            ->to($today);
     }
 
     public function from(DateTimeInterface|string $start): static

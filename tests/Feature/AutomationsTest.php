@@ -102,12 +102,16 @@ it('reports a free plan hitting a gated endpoint as a paid-plan error', function
         'upgrade_url' => 'https://app.notifypress.com/billing',
     ]);
 
+    $exception = null;
+
     try {
         testClient($http)->automations->create(AutomationPayload::onSubscriberCreated('X'));
-        expect()->fail('Expected a PaidPlanException.');
-    } catch (PaidPlanException $exception) {
-        expect($exception->upgradeUrl)->toBe('https://app.notifypress.com/billing');
+    } catch (PaidPlanException $caught) {
+        $exception = $caught;
     }
+
+    // A null here means either nothing was thrown or it was the wrong type.
+    expect($exception?->upgradeUrl)->toBe('https://app.notifypress.com/billing');
 });
 
 it('lists the templates gallery as raw config', function () {
