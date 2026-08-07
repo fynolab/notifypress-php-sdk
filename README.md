@@ -33,10 +33,16 @@ NotifyPress issues two credentials per site, and they are not interchangeable:
 
 | | Where to find it | Where it may be used |
 |---|---|---|
-| **API token** (`{id}\|{secret}`) | Site settings → API token | Servers only. It is a secret with full access to the site. |
+| **API token** | Site settings → API token | Servers only. It is a secret with full access to the site. |
 | **Public key** (`npk_...`) | Site settings → widget snippet | Safe to embed in a page. Used only by the public opt-in endpoints. |
 
 Use `NotifyPress` with the API token, and `NotifyPressPublic` with the public key.
+
+> **Pass the token exactly as the dashboard shows it.** If you have a value containing
+> a pipe, use only the part *after* the pipe. The part before it is an internal id the
+> server supplies itself; including it
+> still authenticates, so nothing looks wrong, but the site can no longer be resolved
+> and every call fails with `NotFoundException: No site is linked to this API token.`
 
 ## Quickstart per environment
 
@@ -47,7 +53,7 @@ Nothing to configure. The SDK falls back to cURL, then PHP streams.
 ```php
 require 'vendor/autoload.php';
 
-$client = new NotifyPress\NotifyPress('1|your-secret');
+$client = new NotifyPress\NotifyPress('your-api-token');
 
 foreach ($client->subscribers->list() as $subscriber) {
     echo $subscriber->token, PHP_EOL;
@@ -96,7 +102,7 @@ use NotifyPress\Config;
 use NotifyPress\Http\Client\Psr18Client;
 
 $client = new NotifyPress(
-    Config::make('1|your-secret')->withHttpClient(new Psr18Client($yourPsr18Client))
+    Config::make('your-api-token')->withHttpClient(new Psr18Client($yourPsr18Client))
 );
 ```
 
@@ -108,7 +114,7 @@ $client = new NotifyPress(
 use NotifyPress\Config;
 
 $client = new NotifyPress(
-    Config::make('1|your-secret')
+    Config::make('your-api-token')
         ->withBaseUrl('https://app.notifypress.com/api/v1')
         ->withTimeout(10.0)
         ->withMaxRetries(4)

@@ -32,7 +32,10 @@ use NotifyPress\Resource\Tags;
  * );
  * ```
  *
- * The API token is a site secret in the form `{id}|{secret}`. Keep it on the
+ * The API token is a site secret. Pass it exactly as the dashboard shows it —
+ * a single opaque string with no `|` in it; if the value you have contains a
+ * pipe, pass only the part after it, or the site cannot be resolved and every
+ * call fails with "No site is linked to this API token". Keep it on the
  * server — never ship it to a browser. For browser-side opt-in use
  * {@see NotifyPressPublic} with the site's public `npk_` key instead.
  *
