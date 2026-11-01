@@ -31,5 +31,5 @@ Initial release — full parity with the JavaScript SDK.
   the server's.
 - `Redactor`, keeping credentials out of logs, messages, and stack traces.
 
-[Unreleased]: https://github.com/fynolab/notifypress-php/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/fynolab/notifypress-php/releases/tag/v0.1.0
+[Unreleased]: https://github.com/fynolab/notifypress-php-sdk/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/fynolab/notifypress-php-sdk/releases/tag/v0.1.0

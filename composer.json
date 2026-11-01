@@ -12,8 +12,8 @@
     ],
     "homepage": "https://notifypress.com",
     "support": {
-        "issues": "https://github.com/fynolab/notifypress-php/issues",
-        "source": "https://github.com/fynolab/notifypress-php"
+        "issues": "https://github.com/fynolab/notifypress-php-sdk/issues",
+        "source": "https://github.com/fynolab/notifypress-php-sdk"
     },
     "require": {
         "php": "^8.1",
