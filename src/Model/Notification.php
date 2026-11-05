@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace NotifyPress\Model;
 
+use DateTimeImmutable;
 use NotifyPress\Enum\NotificationStatus;
+use Throwable;
 
 final class Notification extends Model
 {
@@ -23,8 +25,8 @@ final class Notification extends Model
         public readonly ?string $imageUrl,
         public readonly ?int $segmentId,
         /**
-         * "Y-m-d H:i:s" in the account's display timezone — not ISO 8601 and
-         * not UTC. Kept as a string so no timezone is silently assumed.
+         * ISO 8601 in UTC, like every timestamp on responses (e.g.
+         * "2026-08-15T03:30:00+00:00"). See scheduledAtDate() for a DateTime.
          */
         public readonly ?string $scheduledAt,
         public readonly ?string $nextRunAt,
@@ -32,6 +34,8 @@ final class Notification extends Model
         public readonly ?string $createdAt,
         public readonly ?NotificationAnalytics $analytics,
         array $raw = [],
+        /** IANA timezone a recurring send's time and weekdays are in; null when not recurring. */
+        public readonly ?string $recurringTimezone = null,
     ) {
         parent::__construct($raw);
     }
@@ -60,7 +64,45 @@ final class Notification extends Model
             self::str($data, 'created_at'),
             $analytics === [] ? null : NotificationAnalytics::fromArray($analytics),
             $data,
+            self::str($data, 'recurring_timezone'),
         );
+    }
+
+    public function scheduledAtDate(): ?DateTimeImmutable
+    {
+        return self::instant($this->scheduledAt);
+    }
+
+    public function nextRunAtDate(): ?DateTimeImmutable
+    {
+        return self::instant($this->nextRunAt);
+    }
+
+    public function sentAtDate(): ?DateTimeImmutable
+    {
+        return self::instant($this->sentAt);
+    }
+
+    public function createdAtDate(): ?DateTimeImmutable
+    {
+        return self::instant($this->createdAt);
+    }
+
+    /**
+     * A response timestamp (ISO 8601 with an offset) as a DateTime; null when absent or invalid.
+     * Convert it with ->setTimezone() to show it in your user's timezone.
+     */
+    private static function instant(?string $value): ?DateTimeImmutable
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        try {
+            return new DateTimeImmutable($value);
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     /**

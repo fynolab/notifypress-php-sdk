@@ -7,6 +7,39 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** `scheduled_at` is now sent as an exact instant, ISO 8601 with the offset
+  (`ScheduleNotification::DATE_FORMAT` is `DateTimeInterface::ATOM`). The NotifyPress API stores
+  every time in UTC and rejects a bare `Y-m-d H:i:s`, which it used to read in the account's
+  display timezone. `at()` and `scheduleDraft()` send a `DateTime` with its own offset, so build
+  it in your user's timezone; strings must carry an offset.
+- `ScheduleNotification::scheduledAt()` and `Notifications::scheduleDraft()` throw
+  `InvalidArgumentException` for a string without an offset instead of sending it.
+- Response timestamps are documented as ISO 8601 in UTC (they are no longer display-timezone
+  wall-clock strings).
+
+- **Breaking:** `Segments::list()` now returns a `CursorPage` and takes a query first
+  (`list(Query|array $query = [], ?RequestOptions $options = null)`). It used to read only the
+  first page, so accounts with more than 10 segments silently got 10. Page with `nextPage()` /
+  `autoPaging()`, or ask for up to 100 per page with `SegmentQuery::perPage()`.
+
+### Added
+
+- `Notifications::capabilities()`: `['canSchedule' => bool, 'canRecur' => bool]` for the plan.
+- `NotificationQuery::fullText()` and `excludeWelcome()`.
+- `SubscriberQuery::sortByCreatedAt()`, the dashboard's order (index-backed on large sites).
+- `CursorPage::$active`, `isPaidUser()` and `meta()`; `OffsetPage::statusCounts()` and `meta()`.
+- `AutomationQuery::status()` and `search()`.
+- `SegmentQuery::perPage()`, `Segment::$subscriberCount`, `$subscriberCountComputedAt` and
+  `tags()`.
+- Docblocks note that `Tags::create()` and `Subscribers::addTag()` are paid-plan features and
+  throw `PaidPlanException` on the Free plan.
+- `RecurringSchedule::inTimezone()`: the IANA timezone a recurring send's time and weekdays are
+  in. The API keeps the local time across daylight saving changes.
+- `Notification::$recurringTimezone`, and `scheduledAtDate()`, `nextRunAtDate()`,
+  `sentAtDate()` and `createdAtDate()` returning `DateTimeImmutable`.
+
 ## [0.1.0] - 2026-08-03
 
 Initial release — full parity with the JavaScript SDK.

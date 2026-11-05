@@ -22,7 +22,8 @@ final class Tags extends Resource
     }
 
     /**
-     * POST /tags — a site may hold up to 200 tags.
+     * POST /tags — a site may hold up to 200 tags. Tags are a paid feature: on the Free plan
+     * this throws PaidPlanException (listing and deleting tags stay open).
      *
      * @param TagCreate|array<string, mixed> $payload
      */

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace NotifyPress\Query;
 
+use NotifyPress\Enum\AutomationStatus;
+
 /**
  * Filters for GET /automations.
  *
@@ -33,6 +35,33 @@ final class AutomationQuery implements Query
     {
         $clone = clone $this;
         $clone->params['page'] = $page;
+
+        return $clone;
+    }
+
+    /**
+     * Only automations with this status. An unknown status is ignored by the API.
+     */
+    public function status(AutomationStatus|string $status): self
+    {
+        $clone = clone $this;
+        $clone->params['status'] = $status instanceof AutomationStatus ? $status->value : $status;
+
+        return $clone;
+    }
+
+    /**
+     * Case-insensitive search on the automation name.
+     */
+    public function search(string $query): self
+    {
+        $clone = clone $this;
+
+        if ($query === '') {
+            unset($clone->params['q']);
+        } else {
+            $clone->params['q'] = $query;
+        }
 
         return $clone;
     }

@@ -56,6 +56,19 @@ final class SubscriberQuery implements Query
     }
 
     /**
+     * Order by registration date (then id), the same order as the dashboard's Subscribers page.
+     * It stays fast on large sites; the default id order has to sort the whole site first.
+     * Combine with oldestFirst() / newestFirst(). Kept on every page by nextPage().
+     */
+    public function sortByCreatedAt(): self
+    {
+        $clone = clone $this;
+        $clone->params['sort'] = 'created_at';
+
+        return $clone;
+    }
+
+    /**
      * @return array<string, scalar|null>
      */
     public function toArray(): array

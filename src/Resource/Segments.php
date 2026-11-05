@@ -6,24 +6,28 @@ namespace NotifyPress\Resource;
 
 use NotifyPress\Http\RequestOptions;
 use NotifyPress\Model\Segment;
-use NotifyPress\Pagination\ResultSet;
+use NotifyPress\Pagination\CursorPage;
 use NotifyPress\Payload\SegmentPayload;
 use NotifyPress\Payload\SegmentRule;
+use NotifyPress\Query\Query;
 
 final class Segments extends Resource
 {
     /**
-     * GET /segments — every segment on the current site.
+     * GET /segments — the current site's segments, cursor-paginated (10 per page by default,
+     * up to 100 with SegmentQuery::perPage()). Use autoPaging() or all-pages iteration to get
+     * every segment.
      *
      * The response also reports whether the account is on a paid plan, so a
      * client can render a locked state rather than inferring it from a 403:
      * `$client->segments->list()->isPaidUser()`.
      *
-     * @return ResultSet<Segment>
+     * @param  Query|array<string, scalar|null> $query
+     * @return CursorPage<Segment>
      */
-    public function list(?RequestOptions $options = null): ResultSet
+    public function list(Query|array $query = [], ?RequestOptions $options = null): CursorPage
     {
-        return $this->resultSet('/segments', [], Segment::fromArray(...), $options);
+        return $this->cursorPage('/segments', $this->params($query), Segment::fromArray(...), $options);
     }
 
     /**

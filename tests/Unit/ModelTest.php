@@ -100,15 +100,19 @@ it('defaults missing fields instead of fataling', function () {
         ->and($subscriber->country)->toBeNull();
 });
 
-it('keeps datetimes as strings rather than guessing a timezone', function () {
-    // scheduled_at is wall-clock time in the account's display timezone, so
-    // parsing it into a DateTime here would attach the wrong one.
+it('keeps response datetimes as ISO strings and parses them on request', function () {
+    // Every timestamp on responses is ISO 8601 in UTC.
     $notification = Notification::fromArray([
         'id' => 1,
         'title' => 'T',
         'message' => 'M',
-        'scheduled_at' => '2026-08-15 09:30:00',
+        'scheduled_at' => '2026-08-15T03:30:00+00:00',
+        'sent_at' => null,
+        'recurring_timezone' => 'Asia/Dhaka',
     ]);
 
-    expect($notification->scheduledAt)->toBe('2026-08-15 09:30:00');
+    expect($notification->scheduledAt)->toBe('2026-08-15T03:30:00+00:00')
+        ->and($notification->scheduledAtDate()?->setTimezone(new DateTimeZone('Asia/Dhaka'))->format('Y-m-d H:i'))->toBe('2026-08-15 09:30')
+        ->and($notification->sentAtDate())->toBeNull()
+        ->and($notification->recurringTimezone)->toBe('Asia/Dhaka');
 });

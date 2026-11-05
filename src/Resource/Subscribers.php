@@ -56,7 +56,9 @@ final class Subscribers extends Resource
     }
 
     /**
-     * POST /subscribers/{token}/tags — attaches an existing tag.
+     * POST /subscribers/{token}/tags — attaches an existing tag. Tagging is a paid feature: on
+     * the Free plan this throws PaidPlanException. removeTag() stays open. The list page's
+     * isPaidUser() tells you up front.
      *
      * @return array<string, mixed>
      */

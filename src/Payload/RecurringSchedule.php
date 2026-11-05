@@ -15,8 +15,11 @@ use NotifyPress\Payload\Concerns\BuildsPayload;
  * a single generic builder makes it easy to send an invalid combination:
  *
  *     RecurringSchedule::daily('09:30');
- *     RecurringSchedule::weekly('09:30')->onDays([1, 3, 5]);
+ *     RecurringSchedule::weekly('09:30')->onDays([1, 3, 5])->inTimezone('Asia/Dhaka');
  *     RecurringSchedule::monthly('09:30')->onDayOfMonth(15);
+ *
+ * The time and weekdays are read in inTimezone() (an IANA name). Without it the API uses the
+ * account's saved timezone. Each run keeps its local time across daylight saving changes.
  */
 final class RecurringSchedule implements Payload
 {
@@ -33,7 +36,7 @@ final class RecurringSchedule implements Payload
     }
 
     /**
-     * @param string $time Wall-clock time in "H:i" format, e.g. "09:30".
+     * @param string $time Wall-clock time in "H:i" format, e.g. "09:30", in inTimezone().
      */
     public static function daily(string $time): self
     {
@@ -71,5 +74,13 @@ final class RecurringSchedule implements Payload
     public function time(string $time): static
     {
         return $this->set('time', $time);
+    }
+
+    /**
+     * The IANA timezone the time and weekdays are in, e.g. "Asia/Dhaka" or "America/Toronto".
+     */
+    public function inTimezone(string $timezone): static
+    {
+        return $this->set('timezone', $timezone);
     }
 }

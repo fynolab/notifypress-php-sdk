@@ -20,7 +20,8 @@ use NotifyPress\Payload\ReportRange;
 final class Reports extends Resource
 {
     /**
-     * GET /reports/meta — what can be reported on, and the retention window.
+     * GET /reports/meta — what can be reported on, the retention window, `isPaidUser`, and
+     * `scheduledReportsEnabled` (whether weekly/monthly emailed reports are on for the site).
      *
      * @return array<string, mixed>
      */

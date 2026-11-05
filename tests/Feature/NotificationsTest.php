@@ -148,36 +148,51 @@ it('schedules a new notification', function () {
 
     testClient($http)->notifications->schedule(
         ScheduleNotification::make('Morning', 'Rise and shine')
-            ->at(new DateTimeImmutable('2026-08-15 09:30:00'))
+            ->at(new DateTimeImmutable('2026-08-15 09:30:00', new DateTimeZone('Asia/Dhaka')))
     );
 
     expect($http->bodyAt(0))->toBe([
         'title' => 'Morning',
         'message' => 'Rise and shine',
-        'scheduled_at' => '2026-08-15 09:30:00',
+        'scheduled_at' => '2026-08-15T09:30:00+06:00',
     ]);
 });
 
-it('formats a scheduled draft time as wall clock, without timezone conversion', function () {
+it('sends a scheduled draft time with its offset, so the instant is exact', function () {
     $http = MockHttpClient::make()->willRespond(200, ['message' => 'Scheduled.']);
 
-    // The API reads this in the account's display timezone. Converting to UTC
-    // here would silently move the send by the offset.
+    // The DateTime's own timezone decides the moment; the offset travels with it.
     testClient($http)->notifications->scheduleDraft(
         7,
-        new DateTimeImmutable('2026-08-15 09:30:00', new DateTimeZone('America/Toronto'))
+        new DateTimeImmutable('2026-11-20 09:30:00', new DateTimeZone('America/Toronto'))
     );
 
     expect($http->lastRequest()->uri)->toBe('https://api.test/api/v1/notifications/7/schedule')
-        ->and($http->bodyAt(0))->toBe(['scheduled_at' => '2026-08-15 09:30:00']);
+        ->and($http->bodyAt(0))->toBe(['scheduled_at' => '2026-11-20T09:30:00-05:00']);
 });
 
-it('accepts a pre-formatted scheduled time', function () {
+it('uses the daylight saving offset of the date itself', function () {
+    expect(ScheduleNotification::make('T', 'M')->at(new DateTimeImmutable('2026-07-01 09:30:00', new DateTimeZone('America/Toronto')))->toArray()['scheduled_at'])
+        ->toBe('2026-07-01T09:30:00-04:00');
+});
+
+it('accepts a pre-formatted scheduled time that carries its offset', function () {
     $http = MockHttpClient::make()->willRespond(200, ['message' => 'Scheduled.']);
 
-    testClient($http)->notifications->scheduleDraft(7, '2026-08-15 09:30:00');
+    testClient($http)->notifications->scheduleDraft(7, '2026-08-15T03:30:00Z');
 
-    expect($http->bodyAt(0))->toBe(['scheduled_at' => '2026-08-15 09:30:00']);
+    expect($http->bodyAt(0))->toBe(['scheduled_at' => '2026-08-15T03:30:00Z']);
+});
+
+it('rejects a scheduled time without an offset before sending anything', function () {
+    $http = MockHttpClient::make();
+
+    expect(fn () => testClient($http)->notifications->scheduleDraft(7, '2026-08-15 09:30:00'))
+        ->toThrow(InvalidArgumentException::class, 'timezone offset')
+        ->and(fn () => ScheduleNotification::make('T', 'M')->scheduledAt('2026-08-15T09:30:00'))
+        ->toThrow(InvalidArgumentException::class);
+
+    expect($http->callCount())->toBe(0);
 });
 
 it('builds each recurring frequency with only the fields it needs', function () {
@@ -187,6 +202,11 @@ it('builds each recurring frequency with only the fields it needs', function () 
         ->toBe(['frequency' => 'weekly', 'time' => '09:30', 'days' => [1, 3, 5]])
         ->and(RecurringSchedule::monthly('09:30')->onDayOfMonth(15)->toArray())
         ->toBe(['frequency' => 'monthly', 'time' => '09:30', 'day_of_month' => 15]);
+});
+
+it('sends the timezone a recurring time is in', function () {
+    expect(RecurringSchedule::daily('09:30')->inTimezone('Asia/Dhaka')->toArray())
+        ->toBe(['frequency' => 'daily', 'time' => '09:30', 'timezone' => 'Asia/Dhaka']);
 });
 
 it('starts a recurring send', function () {

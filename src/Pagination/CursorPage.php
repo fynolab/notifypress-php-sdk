@@ -41,6 +41,9 @@ final class CursorPage implements Countable, IteratorAggregate
     /** Cached count of the full set. Present on GET /subscribers only. */
     public readonly ?int $total;
 
+    /** Cached count of active subscribers. Present on GET /subscribers only. */
+    public readonly ?int $active;
+
     /** @var array<string, mixed> The undecorated page payload. */
     public readonly array $raw;
 
@@ -79,6 +82,25 @@ final class CursorPage implements Countable, IteratorAggregate
         $this->prevCursor = self::readString($raw, $meta, 'prev_cursor');
         $this->perPage = self::readInt($raw, $meta, 'per_page');
         $this->total = self::readInt($raw, $meta, 'total');
+        $this->active = self::readInt($raw, $meta, 'active');
+    }
+
+    /**
+     * Any other envelope key, e.g. `$page->meta('isPaidUser')`.
+     */
+    public function meta(string $key, mixed $default = null): mixed
+    {
+        return $this->raw[$key] ?? $default;
+    }
+
+    /**
+     * Whether the account has a paid subscription. GET /subscribers reports it (tagging is a
+     * paid feature) and so does GET /segments, so a client can lock those controls up front
+     * instead of guessing from a 403.
+     */
+    public function isPaidUser(): bool
+    {
+        return (bool) ($this->raw['isPaidUser'] ?? false);
     }
 
     public function hasNextPage(): bool

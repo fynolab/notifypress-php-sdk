@@ -41,6 +41,24 @@ final class Notifications extends Resource
     }
 
     /**
+     * GET /notifications/capabilities — which send options the account's plan allows, so a
+     * client can turn Schedule / Recurring off up front. schedule() and recurringSend() enforce
+     * the same rules on the server.
+     *
+     * @return array{canSchedule: bool, canRecur: bool}
+     */
+    public function capabilities(?RequestOptions $options = null): array
+    {
+        $raw = $this->transport->request('GET', '/notifications/capabilities', [], null, $options);
+        $data = is_array($raw['data'] ?? null) ? $raw['data'] : [];
+
+        return [
+            'canSchedule' => (bool) ($data['canSchedule'] ?? false),
+            'canRecur' => (bool) ($data['canRecur'] ?? false),
+        ];
+    }
+
+    /**
      * GET /notifications/live-activity — sends currently in flight.
      *
      * @return array<string, mixed>
@@ -148,8 +166,10 @@ final class Notifications extends Resource
     /**
      * POST /notifications/{id}/schedule — schedules an existing draft.
      *
-     * $scheduledAt is interpreted in the account's display timezone, not UTC.
-     * A DateTime is formatted exactly as given, with no conversion.
+     * A DateTime is sent with its own offset, so its timezone decides the instant. A string must
+     * be ISO 8601 with an offset, e.g. "2026-08-15T09:30:00+06:00".
+     *
+     * @throws \InvalidArgumentException When a string has no offset (the API rejects it).
      */
     public function scheduleDraft(
         int $id,
@@ -158,7 +178,7 @@ final class Notifications extends Resource
     ): SendResult {
         $value = $scheduledAt instanceof DateTimeInterface
             ? $scheduledAt->format(ScheduleNotification::DATE_FORMAT)
-            : $scheduledAt;
+            : ScheduleNotification::assertInstant($scheduledAt);
 
         return SendResult::fromArray($this->transport->request(
             'POST',

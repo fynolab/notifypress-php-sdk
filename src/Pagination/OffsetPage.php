@@ -80,6 +80,32 @@ final class OffsetPage implements Countable, IteratorAggregate
         return (bool) ($this->raw['isPaidUser'] ?? false);
     }
 
+    /**
+     * Any other envelope key.
+     */
+    public function meta(string $key, mixed $default = null): mixed
+    {
+        return $this->raw[$key] ?? $default;
+    }
+
+    /**
+     * GET /automations: how many automations the site has per status tab, over the whole
+     * site (not just this page or filter). `inactive` is the draft count.
+     *
+     * @return array{all: int, active: int, paused: int, inactive: int}
+     */
+    public function statusCounts(): array
+    {
+        $counts = is_array($this->raw['statusCounts'] ?? null) ? $this->raw['statusCounts'] : [];
+
+        return [
+            'all' => (int) ($counts['all'] ?? 0),
+            'active' => (int) ($counts['active'] ?? 0),
+            'paused' => (int) ($counts['paused'] ?? 0),
+            'inactive' => (int) ($counts['inactive'] ?? 0),
+        ];
+    }
+
     public function hasNextPage(): bool
     {
         return $this->currentPage < $this->lastPage;

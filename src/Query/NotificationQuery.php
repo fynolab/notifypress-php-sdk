@@ -58,6 +58,39 @@ final class NotificationQuery implements Query
     }
 
     /**
+     * Return full titles and messages instead of the list's shortened ones (20 / 50 characters).
+     */
+    public function fullText(bool $fullText = true): self
+    {
+        $clone = clone $this;
+
+        if ($fullText) {
+            $clone->params['full_text'] = 1;
+        } else {
+            unset($clone->params['full_text']);
+        }
+
+        return $clone;
+    }
+
+    /**
+     * Leave out the site's welcome message, so the list holds campaigns (and automation
+     * messages) only.
+     */
+    public function excludeWelcome(bool $exclude = true): self
+    {
+        $clone = clone $this;
+
+        if ($exclude) {
+            $clone->params['exclude_welcome'] = 1;
+        } else {
+            unset($clone->params['exclude_welcome']);
+        }
+
+        return $clone;
+    }
+
+    /**
      * @return array<string, scalar|null>
      */
     public function toArray(): array

@@ -7,7 +7,7 @@ namespace NotifyPress\Model;
 final class Segment extends Model
 {
     /**
-     * @param array<string, mixed> $rule Groups keyed location/device/browser,
+     * @param array<string, mixed> $rule Groups keyed location/device/browser/tags,
      *                                   each {condition, values}.
      */
     public function __construct(
@@ -16,9 +16,13 @@ final class Segment extends Model
         public readonly ?string $description,
         public readonly bool $isActive,
         public readonly array $rule,
-        /** Formatted "d M Y" by the server, e.g. "03 Aug 2026". */
+        /** ISO 8601 in UTC, e.g. "2026-08-03T14:00:00+00:00". */
         public readonly ?string $createdAt,
         array $raw = [],
+        /** Stored audience size on list rows; may be up to 30 minutes old. */
+        public readonly ?int $subscriberCount = null,
+        /** When subscriberCount was computed (ISO 8601), or null if never. */
+        public readonly ?string $subscriberCountComputedAt = null,
     ) {
         parent::__construct($raw);
     }
@@ -36,7 +40,19 @@ final class Segment extends Model
             self::arr($data, 'rule'),
             self::str($data, 'created_at'),
             $data,
+            self::int($data, 'subscriber_count'),
+            self::str($data, 'subscriber_count_computed_at'),
         );
+    }
+
+    /**
+     * Tag IDs the segment targets (the rule's `tags` group), as strings like the API returns.
+     *
+     * @return list<string>
+     */
+    public function tags(): array
+    {
+        return $this->values('tags');
     }
 
     /**
